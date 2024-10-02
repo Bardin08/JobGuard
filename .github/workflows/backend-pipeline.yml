@@ -47,8 +47,8 @@ jobs:
       - name: Build and Push Docker Image
         if: github.event_name == 'workflow_dispatch'
         run: |
-          docker build -t ghcr.io/jobguard-api:${{ github.sha }} backend/
-          docker push ghcr.io/jobguard-api:${{ github.sha }} 
+          docker build -t ghcr.io/bardin08/jobguard/jobguard-api:${{ github.sha }} backend/
+          docker push ghcr.io/bardin08/jobguard/jobguard-api:${{ github.sha }} 
 
       # This step will only run if the workflow is triggered manually
       - name: Deploy to Droplet
@@ -59,7 +59,7 @@ jobs:
           username: ${{ secrets.DROPLET_USERNAME }}
           key: ${{ secrets.DROPLET_KEY }}
           script: |
-            docker pull ghcr.io/${{ github.repository }}/jobguard-api:${{ github.sha }}
+            docker pull ghcr.io/bardin08/jobguard/jobguard-api:${{ github.sha }}
             docker stop jobguard-api || true  # Stop the old container if it exists
             docker rm jobguard-api || true    # Remove the old container if it exists
-            docker run -d -p 51244:8080 --name jobguard-api ghcr.io/${{ github.repository }}/jobguard-api:${{ github.sha }}
+            docker run -d -p 51244:8080 --name jobguard-api ghcr.io/bardin08/jobguard/jobguard-api:${{ github.sha }}
