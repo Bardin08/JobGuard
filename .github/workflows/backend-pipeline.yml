@@ -58,6 +58,7 @@ jobs:
           host: ${{ secrets.DROPLET_HOST }}
           username: ${{ secrets.DROPLET_USERNAME }}
           key: ${{ secrets.DROPLET_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
             docker pull ghcr.io/bardin08/jobguard/jobguard-api:${{ github.sha }}
             docker stop jobguard-api || true  # Stop the old container if it exists
