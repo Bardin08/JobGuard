@@ -47,8 +47,8 @@ jobs:
       - name: Build and Push Docker Image
         if: github.event_name == 'workflow_dispatch'
         run: |
-          docker build -t ghcr.io/${{ github.repository }}/jobguard-api:${{ github.sha }} backend/
-          docker push ghcr.io/${{ github.repository }}/jobguard-api:${{ github.sha }} 
+          docker build -t ghcr.io/jobguard-api:${{ github.sha }} backend/
+          docker push ghcr.io/jobguard-api:${{ github.sha }} 
 
       # This step will only run if the workflow is triggered manually
       - name: Deploy to Droplet
