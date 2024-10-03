@@ -1,0 +1,32 @@
+<div class="vacancy-checker-container">
+    <div class="info-section">
+        <h2>Як користуватися JobGuard</h2>
+        <p>
+            Введіть URL посилання на вакансію або вставте детальний опис вакансії, яку ви хочете перевірити.
+        </p>
+        <h3>JobGuard допомагає вам:</h3>
+        <ul>
+            <li>Перевірити існування вакансії на інших ресурсах</li>
+            <li>Підтвердити відповідність реальним пропозиціям</li>
+            <li>Перевірити законність і репутацію компанії-роботодавця</li>
+        </ul>
+        <p class="cta">
+            Використовуйте JobGuard для надійного та безпечного пошуку роботи!
+        </p>
+    </div>
+
+    <div class="form-section">
+        <h3>Введіть URL або опис вакансії:</h3>
+        <form (ngSubmit)="onSubmit()">
+            <textarea
+                id="vacancyInput"
+                [(ngModel)]="vacancyInput"
+                name="vacancyInput"
+                rows="6"
+                placeholder="Вставте посилання на вакансію або її детальний опис тут"
+                required
+            ></textarea>
+            <button type="submit" class="btn-primary">Перевірити вакансію</button>
+        </form>
+    </div>
+</div>

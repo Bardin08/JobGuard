@@ -1,0 +1,256 @@
+.vacancy-report {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.status-banner {
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 1px solid #e5e7eb;
+
+  &.high-risk {
+    background-color: #fef2f2;
+    border-color: #fee2e2;
+
+    .icon-container {
+      background-color: #fff1f2;
+    }
+
+    .banner-text h1 {
+      color: #dc2626;
+    }
+  }
+
+  .banner-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+
+    .banner-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      .icon-container {
+        background-color: #f8f9fa;
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        mat-icon {
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
+
+          &.warn {
+            color: #dc2626;
+          }
+        }
+      }
+
+      .banner-text {
+        h1 {
+          margin: 0;
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #111827;
+        }
+
+        p {
+          margin: 4px 0 0;
+          font-size: 0.875rem;
+          color: #6b7280;
+        }
+      }
+    }
+
+    .fraud-score {
+      background-color: #f3f4f6;
+      padding: 8px 16px;
+      border-radius: 24px;
+
+      &.success { background-color: #f0fdf4; color: #166534; }
+      &.warning { background-color: #fef3c7; color: #92400e; }
+      &.error { background-color: #fef2f2; color: #dc2626; }
+
+      .score-text {
+        font-weight: 500;
+        font-size: 0.875rem;
+      }
+    }
+  }
+}
+
+.job-content {
+  display: grid;
+  gap: 24px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.job-details-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+
+  .job-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #e5e7eb;
+
+    .title-section {
+      .job-title {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #111827;
+      }
+
+      .company-name {
+        margin: 4px 0 0;
+        font-size: 1rem;
+        color: #6b7280;
+      }
+    }
+
+    .verification-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 24px;
+      background-color: #fef2f2;
+      color: #dc2626;
+
+      &.verified {
+        background-color: #f0fdf4;
+        color: #166534;
+      }
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+
+      span {
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-bottom: 24px;
+
+    .detail-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+
+      mat-icon {
+        color: #6b7280;
+      }
+
+      .detail-content {
+        display: flex;
+        flex-direction: column;
+
+        .label {
+          font-size: 0.875rem;
+          color: #6b7280;
+          margin-bottom: 4px;
+        }
+
+        .value {
+          color: #111827;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+
+  .job-description {
+    background-color: #f8f9fa;
+    padding: 24px;
+    border-radius: 8px;
+
+    h3 {
+      margin: 0 0 16px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    p {
+      margin: 0;
+      color: #4b5563;
+      line-height: 1.5;
+    }
+  }
+}
+
+.risk-assessment-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #fee2e2;
+
+  .risk-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #dc2626;
+  }
+
+  .risk-flags {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .risk-flag {
+      display: flex;
+      gap: 12px;
+      padding: 16px;
+      background-color: #fef2f2;
+      border-radius: 8px;
+
+      mat-icon {
+        flex-shrink: 0;
+      }
+
+      .flag-content {
+        h4 {
+          margin: 0 0 4px;
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #dc2626;
+        }
+
+        p {
+          margin: 0;
+          font-size: 0.875rem;
+          color: #ef4444;
+        }
+      }
+    }
+  }
+}
