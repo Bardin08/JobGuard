@@ -1,6 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobGuard.Api", "JobGuard.Api\JobGuard.Api.csproj", "{F42B5E7E-B57F-47DB-A80B-C29A8CB8B05B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobGuard.Api", "src\JobGuard.Api\JobGuard.Api.csproj", "{F42B5E7E-B57F-47DB-A80B-C29A8CB8B05B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{23809209-A4F6-4E05-9E0F-5A53B9563BD9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobGuard.Application", "src\JobGuard.Application\JobGuard.Application.csproj", "{5E21CABE-7E97-4B0D-8A36-5C8ED106C710}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobGuard.Domain", "src\JobGuard.Domain\JobGuard.Domain.csproj", "{3A1D3228-1FC5-47EB-A82A-27B5383DEFFC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JobGuard.Infrastructure", "src\JobGuard.Infrastructure\JobGuard.Infrastructure.csproj", "{78DDE171-C261-48ED-988D-E2D964EFC347}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -12,5 +20,23 @@ Global
 		{F42B5E7E-B57F-47DB-A80B-C29A8CB8B05B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F42B5E7E-B57F-47DB-A80B-C29A8CB8B05B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F42B5E7E-B57F-47DB-A80B-C29A8CB8B05B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E21CABE-7E97-4B0D-8A36-5C8ED106C710}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E21CABE-7E97-4B0D-8A36-5C8ED106C710}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E21CABE-7E97-4B0D-8A36-5C8ED106C710}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E21CABE-7E97-4B0D-8A36-5C8ED106C710}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A1D3228-1FC5-47EB-A82A-27B5383DEFFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A1D3228-1FC5-47EB-A82A-27B5383DEFFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A1D3228-1FC5-47EB-A82A-27B5383DEFFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A1D3228-1FC5-47EB-A82A-27B5383DEFFC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78DDE171-C261-48ED-988D-E2D964EFC347}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78DDE171-C261-48ED-988D-E2D964EFC347}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78DDE171-C261-48ED-988D-E2D964EFC347}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78DDE171-C261-48ED-988D-E2D964EFC347}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F42B5E7E-B57F-47DB-A80B-C29A8CB8B05B} = {23809209-A4F6-4E05-9E0F-5A53B9563BD9}
+		{5E21CABE-7E97-4B0D-8A36-5C8ED106C710} = {23809209-A4F6-4E05-9E0F-5A53B9563BD9}
+		{3A1D3228-1FC5-47EB-A82A-27B5383DEFFC} = {23809209-A4F6-4E05-9E0F-5A53B9563BD9}
+		{78DDE171-C261-48ED-988D-E2D964EFC347} = {23809209-A4F6-4E05-9E0F-5A53B9563BD9}
 	EndGlobalSection
 EndGlobal

@@ -19,10 +19,10 @@ jobs:
           dotnet-version: '8.0'
 
       - name: Build Backend API
-        run: dotnet build backend/JobGuard.Api/JobGuard.Api.csproj --configuration Release
+        run: dotnet build backend/src/JobGuard.Api/JobGuard.Api.csproj --configuration Release
 
 #      - name: Run Tests
-#        run: dotnet test backend/JobGuard.Api/JobGuard.Api.csproj
+#        run: dotnet test backend/src/JobGuard.Api/JobGuard.Api.csproj
 
       # This step will only run if the workflow is triggered manually
 #      - name: Variable Substitution in appsettings.json
