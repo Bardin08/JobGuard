@@ -1,4 +1,4 @@
-namespace JobGuard.Api.Models.VacancyCheck.Reports;
+namespace JobGuard.Api.Models.Verification.Reports;
 
 /// <summary>
 /// Represents the compliance status of the company, including legal and regulatory information.

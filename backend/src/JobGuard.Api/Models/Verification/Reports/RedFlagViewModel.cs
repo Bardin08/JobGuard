@@ -1,4 +1,4 @@
-namespace JobGuard.Api.Models.VacancyCheck.Reports;
+namespace JobGuard.Api.Models.Verification.Reports;
 
 /// <summary>
 /// Represents a red flag indicating potential issues in the job vacancy or company.

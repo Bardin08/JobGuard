@@ -1,4 +1,4 @@
-namespace JobGuard.Api.Models.VacancyCheck.Reports;
+namespace JobGuard.Api.Models.Verification.Reports;
 
 /// <summary>
 /// Represents the strategy used to reduce the risk associated with a red flag.

@@ -1,4 +1,4 @@
-namespace JobGuard.Api.Models.VacancyCheck.Reports;
+namespace JobGuard.Api.Models.Verification.Reports;
 
 internal record CheckVacancyReportResponseModel
 {

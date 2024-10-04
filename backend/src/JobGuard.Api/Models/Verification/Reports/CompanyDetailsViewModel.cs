@@ -1,4 +1,4 @@
-namespace JobGuard.Api.Models.VacancyCheck.Reports;
+namespace JobGuard.Api.Models.Verification.Reports;
 
 /// <summary>
 /// Represents information about the company offering the job.

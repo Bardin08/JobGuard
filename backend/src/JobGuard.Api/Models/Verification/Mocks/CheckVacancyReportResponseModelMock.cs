@@ -1,6 +1,6 @@
-using JobGuard.Api.Models.VacancyCheck.Reports;
+using JobGuard.Api.Models.Verification.Reports;
 
-namespace JobGuard.Api.Models.Mocks;
+namespace JobGuard.Api.Models.Verification.Mocks;
 
 internal static class CheckVacancyReportResponseModelMock
 {
