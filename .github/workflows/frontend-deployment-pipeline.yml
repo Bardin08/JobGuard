@@ -44,7 +44,7 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           passphrase: ${{ secrets.DROPLET_SSH_KEY_PASSPHRASE }}
           script: |
-            docker pull ghcr.io/bardin08/jobguard/${{ env.GHCR_REPOSITORY }}:${{ github.sha }}
+            docker pull {{ env.GHCR_REGISTRY }}${{ env.GHCR_REPOSITORY }}:${{ github.sha }}
             docker stop ${{ env.GHCR_REPOSITORY }} || true
             docker rm ${{ env.GHCR_REPOSITORY }} || true
             docker run -d -p 8080:4200 --name ${{ env.GHCR_REPOSITORY }} \
