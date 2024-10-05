@@ -19,16 +19,38 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Restore NuGet packages cache
+        id: nuget-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}-${{ hashFiles('**/*.sln') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_SDK_VERSION }}
 
+      - name: Restore NuGet packages
+        run: dotnet restore backend/JobGuard.sln
+
+      - name: Cache new or updated NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}-${{ hashFiles('**/*.sln') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+        if: steps.nuget-cache.outputs.cache-hit != 'true'  # Only update cache if it's not already restored
+
       - name: Build Backend API
         run: |
           dotnet build \
           ${{ env.APPLICATION_SOURCES_ROOT }}/${{ env.APPLICATION_NAME }}/${{ env.APPLICATION_NAME }}.csproj \
-          --configuration Release
+          --configuration Release \
+          --no-restore
 
   linting:
     runs-on: ubuntu-latest
