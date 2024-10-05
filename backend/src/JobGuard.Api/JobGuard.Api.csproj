@@ -21,4 +21,9 @@
       <ProjectReference Include="..\JobGuard.Infrastructure\JobGuard.Infrastructure.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <None Update="Resources/build-metadata.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 </Project>
