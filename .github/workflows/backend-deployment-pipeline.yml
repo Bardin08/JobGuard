@@ -11,8 +11,6 @@ on:
           - dev
 
 env:
-  DOTNET_TFM: net8.0
-  APP_NAME: Cricut.PushNotifications
   GHCR_REGISTRY: ghcr.io/bardin08/jobguard
   GHCR_REPOSITORY: jobguard-api
 
@@ -33,10 +31,7 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build `
-          -t ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_REPOSITORY }}:${{ github.sha }} `
-          --build-arg BIN_PATH=bin/Release/${{env.DOTNET_TFM}}/publish `
-          /backend
+          docker build -t ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_REPOSITORY }}:${{ github.sha }} /backend
 
           docker push ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_REPOSITORY }}:${{ github.sha }}
 
