@@ -11,6 +11,8 @@ env:
   APPLICATION_NAME: JobGuard.Api
   DOTNET_SDK_VERSION: 8.x
   DOTNET_NOLOGO: true
+  GHCR_REGISTRY: ghcr.io/bardin08/jobguard
+  GHCR_REPOSITORY: jobguard-api
 
 jobs:
   build:
@@ -18,7 +20,7 @@ jobs:
     permissions: write-all
     steps:
       - uses: actions/checkout@v4
-        with: 
+        with:
           fetch-depth: 0
 
       - name: Restore NuGet packages cache
@@ -49,11 +51,19 @@ jobs:
 
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
+      - name: Get actual branch name
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "BRANCH_NAME=${GITHUB_HEAD_REF}" >> $GITHUB_ENV
+          else
+            echo "BRANCH_NAME=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+          fi
+
       - name: Save build metadata to environment variables
         run: |
           echo "VERSION=${{ env.VERSION }}" >> $GITHUB_ENV
           echo "COMMIT_HASH=${{ github.sha }}" >> $GITHUB_ENV
-          echo "BRANCH_NAME=${{ github.ref }}" >> $GITHUB_ENV
+          echo "BRANCH_NAME=${{ env.BRANCH_NAME }}" >> $GITHUB_ENV
           echo "BUILD_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_ENV
           echo "BUILD_NUMBER=${{ github.run_number }}" >> $GITHUB_ENV
 
@@ -94,7 +104,21 @@ jobs:
           ${{ env.APPLICATION_SOURCES_ROOT }}/${{ env.APPLICATION_NAME }}/${{ env.APPLICATION_NAME }}.csproj \
           --configuration Release \
           --no-restore \
-          /p:Version=${{ env.VERSION }}
+          /p:Version=${{ env.VERSION }} \
+          --output backend/output
+          
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_REPOSITORY }}:${{ github.sha }} backend/
+
+          docker push ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_REPOSITORY }}:${{ github.sha }}
 
   linting:
     runs-on: ubuntu-latest
