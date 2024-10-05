@@ -1,4 +1,4 @@
-name: JobGuard API Deployment
+name: JobGuard UI Deployment
 
 on:
   workflow_dispatch:
