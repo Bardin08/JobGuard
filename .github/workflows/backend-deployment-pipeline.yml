@@ -15,7 +15,7 @@ env:
   GHCR_REPOSITORY: jobguard-api
 
 jobs:
-  build-docker-image-and-deploy:
+  deployment:
     runs-on: ubuntu-latest
     permissions: write-all
     environment: ${{ inputs.environment }}
