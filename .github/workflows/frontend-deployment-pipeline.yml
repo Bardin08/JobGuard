@@ -1,0 +1,51 @@
+name: JobGuard API Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment for the deployment
+        required: true
+        type: choice
+        options:
+          - dev
+
+env:
+  GHCR_REGISTRY: ghcr.io/bardin08/jobguard
+  GHCR_REPOSITORY: jobguard-frontend
+
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_REPOSITORY }}:${{ github.sha }} frontend/JobGuard
+
+          docker push ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_REPOSITORY }}:${{ github.sha }}
+
+      - name: Deploy to Droplet
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USERNAME }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          passphrase: ${{ secrets.DROPLET_SSH_KEY_PASSPHRASE }}
+          script: |
+            docker pull ghcr.io/bardin08/jobguard/${{ env.GHCR_REPOSITORY }}:${{ github.sha }}
+            docker stop ${{ env.GHCR_REPOSITORY }} || true
+            docker rm ${{ env.GHCR_REPOSITORY }} || true
+            docker run -d -p 80:4200 --name ${{ env.GHCR_REPOSITORY }} \
+              ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_REPOSITORY }}:${{ github.sha }}
