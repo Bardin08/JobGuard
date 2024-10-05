@@ -41,6 +41,12 @@ public class Verification : Entity
     {
         _dataPieces.Add(dataPiece);
     }
+
+    public void ChangeStatus(VerificationStatus newStatus)
+    {
+        Status = newStatus;
+        ModifiedAt = DateTimeOffset.UtcNow;
+    }
 }
 
 public enum VerificationStatus

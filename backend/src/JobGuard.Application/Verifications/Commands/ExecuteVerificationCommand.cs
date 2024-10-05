@@ -1,11 +1,10 @@
-using System.Text;
 using FluentValidation;
+using Jobby.Domain.Repositories;
 using JobGuard.Application.Abstractions.Messaging;
-using JobGuard.Application.DataCollection.Commands;
-using JobGuard.Application.Vacancies.Commands;
+using JobGuard.Application.Verifications.Jobs;
 using JobGuard.Domain.Entities;
 using JobGuard.Domain.Repositories;
-using MediatR;
+using Quartz;
 
 namespace JobGuard.Application.Verifications.Commands;
 
@@ -22,66 +21,52 @@ internal class ExecuteVerificationCommandValidator : AbstractValidator<ExecuteVe
     }
 }
 
-internal class ExecuteVerificationCommandHandler(ISender mediator, IVerificationRepository repository)
-    : ICommandHandler<ExecuteVerificationCommand>
+internal class ExecuteVerificationCommandHandler(
+    ISchedulerFactory schedulerFactory,
+    IVerificationRepository verificationRepository,
+    IUnitOfWork unitOfWork) : ICommandHandler<ExecuteVerificationCommand>
 {
-    private readonly ISender _mediator = mediator;
-    private readonly IVerificationRepository _repository = repository;
+    private readonly ISchedulerFactory _schedulerFactory = schedulerFactory;
+    private readonly IVerificationRepository _verificationRepository = verificationRepository;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task Handle(ExecuteVerificationCommand request, CancellationToken cancellationToken)
     {
         var verificationId = request.VerificationId[4..];
 
-        var verification = await _repository.GetByShortId(verificationId);
+        var verification = await _verificationRepository.GetByShortId(verificationId);
         if (verification is null)
             // TODO: Replace with appropriate exception
             throw new ArgumentException($"Verification with id {verificationId} not found.");
 
         if (verification.Status is not VerificationStatus.Pending)
-            throw new InvalidOperationException($"Verification with id {verificationId} has already been pending.");
+            throw new InvalidOperationException($"Verification with id {verificationId} has already executed.");
 
-        var description = await NormalizeProvidedDetails(cancellationToken, verification);
+        verification.ChangeStatus(VerificationStatus.InProgress);
+        _verificationRepository.Update(verification);
 
-        var createVacancyCommand = new CreateVacancyCommand(
-            description,
-            DataSourceType.ProvidedDescription.ToString(),
-            verification.Id);
-        
-        await _mediator.Send(createVacancyCommand, cancellationToken);
+        await ExecuteVerificationProcessingBackgroundJob(cancellationToken, verification);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task<string> NormalizeProvidedDetails(CancellationToken cancellationToken, Verification verification)
+    private async Task ExecuteVerificationProcessingBackgroundJob(CancellationToken cancellationToken,
+        Verification verification)
     {
-        var description = verification.ProvidedDetails;
-        if (verification.ProvidedLinks.Count > 0)
-        {
-            var linksContent = await GetContentFromLinks(verification.ProvidedLinks, cancellationToken);
+        var scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
 
-            description += linksContent;
-        }
+        var jobKey = new JobKey(nameof(ProcessVerificationBackgroundJob));
 
-        description = description
-            .Replace("\n", " ")
-            .Replace("\t", " ")
-            .Replace("\r", " ");
-        return description;
-    }
+        var jobDetail = JobBuilder.Create<ProcessVerificationBackgroundJob>()
+            .WithIdentity(jobKey)
+            .StoreDurably()
+            .Build();
 
-    private async Task<string> GetContentFromLinks(IReadOnlyList<string> links, CancellationToken cancellationToken)
-    {
-        var tasks = links.Select(async x =>
-        {
-            var command = new FetchDataFromLinkCommand(Url: x, CollectLinks: false, AsPlainText: true);
-            return await _mediator.Send(command, cancellationToken);
-        });
+        if (!await scheduler.CheckExists(jobKey, cancellationToken))
+            await scheduler.AddJob(jobDetail, true, cancellationToken);
 
-        var linkContentDtos = await Task.WhenAll(tasks);
+        var jobDataMap = new JobDataMap();
+        jobDataMap.Add("verificationId", verification.Id);
 
-        var stringBuilder = new StringBuilder();
-        
-        foreach (var linkContentDto in linkContentDtos)
-            stringBuilder.AppendLine().AppendLine(linkContentDto.Content);
-
-        return stringBuilder.ToString();
+        await scheduler.TriggerJob(jobKey, jobDataMap, cancellationToken);
     }
 }

@@ -1,11 +1,7 @@
 using JobGuard.Api.Endpoints;
-using JobGuard.Api.Extensions;
 using JobGuard.Api.Middlewares;
 using JobGuard.Application;
-using JobGuard.Application.Verifications.Commands;
 using JobGuard.Infrastructure;
-using MediatR;
-using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
