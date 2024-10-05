@@ -9,6 +9,10 @@ on:
         type: choice
         options:
           - dev
+      version:
+        description: Application version to deploy
+        required: true
+        type: string
 
 env:
   GHCR_REGISTRY: ghcr.io/bardin08/jobguard
@@ -20,22 +24,6 @@ jobs:
     permissions: write-all
     environment: ${{ inputs.environment }}
     steps:
-      - name: Checkout Source Code
-        uses: actions/checkout@v4
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and Push Docker Image
-        run: |
-          docker build -t ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_REPOSITORY }}:${{ github.sha }} backend/
-
-          docker push ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_REPOSITORY }}:${{ github.sha }}
-
       - name: Deploy to Droplet
         uses: appleboy/ssh-action@master
         with:
@@ -44,11 +32,11 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           passphrase: ${{ secrets.DROPLET_SSH_KEY_PASSPHRASE }}
           script: |
-            docker pull ghcr.io/bardin08/jobguard/${{ env.GHCR_REPOSITORY }}:${{ github.sha }}
+            docker pull ghcr.io/bardin08/jobguard/${{ env.GHCR_REPOSITORY }}:${{ inputs.version }}
             docker stop ${{ env.GHCR_REPOSITORY }} || true
             docker rm ${{ env.GHCR_REPOSITORY }} || true
             docker run -d -p 51244:8080 --name ${{ env.GHCR_REPOSITORY }} \
               -e ConnectionStrings__PostgresDb="${{ secrets.PG_CONNECTION_STRING }}" \
               -e OpenAi__ApiKey="${{ secrets.OPEN_AI_API_KEY }}" \
               -e Tooling__Swagger__Enabled="${{ vars.SWAGGER_ENABLED }}" \
-              ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_REPOSITORY }}:${{ github.sha }}
+              ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_REPOSITORY }}:${{ inputs.version }}
