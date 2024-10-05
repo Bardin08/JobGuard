@@ -5,7 +5,9 @@ using JobGuard.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddUserSecrets<Program>();
+builder.Configuration
+    .AddUserSecrets<Program>()
+    .AddEnvironmentVariables();
 
 builder.Services
     .AddApplication()
