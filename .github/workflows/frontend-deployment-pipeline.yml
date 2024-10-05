@@ -47,5 +47,5 @@ jobs:
             docker pull ghcr.io/bardin08/jobguard/${{ env.GHCR_REPOSITORY }}:${{ github.sha }}
             docker stop ${{ env.GHCR_REPOSITORY }} || true
             docker rm ${{ env.GHCR_REPOSITORY }} || true
-            docker run -d -p 80:4200 --name ${{ env.GHCR_REPOSITORY }} \
+            docker run -d -p 8080:4200 --name ${{ env.GHCR_REPOSITORY }} \
               ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_REPOSITORY }}:${{ github.sha }}
