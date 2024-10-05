@@ -6,8 +6,14 @@ on:
       - 'backend/**'
   workflow_dispatch:
 
+env:
+  APPLICATION_SOURCES_ROOT: backend/src
+  APPLICATION_NAME: JobGuard.Api
+  DOTNET_SDK_VERSION: 8.x
+  DOTNET_NOLOGO: true
+
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
@@ -16,7 +22,39 @@ jobs:
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0'
+          dotnet-version: ${{ env.DOTNET_SDK_VERSION }}
 
       - name: Build Backend API
-        run: dotnet build backend/src/JobGuard.Api/JobGuard.Api.csproj --configuration Release
+        run: |
+          dotnet build `
+              ${{ env.APPLICATION_SOURCES_ROOT }}/${{ env.APPLICATION_NAME }}/${{ env.APPLICATION_NAME }}.csproj `
+              --configuration Release
+
+  linting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET Core SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_SDK_VERSION }}
+
+      - name: Format only modified files
+        run: |
+          MODIFIED_FILES=$(git diff --name-only origin/main...HEAD -- '*.cs')
+          if [ -n "$MODIFIED_FILES" ]; then
+            echo "$MODIFIED_FILES" | xargs dotnet format backend/JobGuard.sln --include --verify-no-changes
+          else
+            echo "No C# files modified. Skipping format check."
+          fi
+
+      - name: Comment on PR if Linting Fails
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.payload.pull_request.number,
+              body: "🚨 **Linting Check Failed**: Please fix the formatting issues before merging.\n\nYou can run `dotnet format` locally to automatically correct these issues."
+            })
