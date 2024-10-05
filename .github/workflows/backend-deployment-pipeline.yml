@@ -50,5 +50,5 @@ jobs:
             docker run -d -p 51244:8080 --name jobguard-api \
               -e ConnectionStrings__PostgresDb="${{ secrets.PG_CONNECTION_STRING }}" \
               -e OpenAi__ApiKey="${{ secrets.OPEN_AI_API_KEY }}" \
-              -e Tooling__Swagger__Enabled="${{ env.SWAGGER_ENABLED }}" \
+              -e Tooling__Swagger__Enabled="${{ vars.SWAGGER_ENABLED }}" \
               ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_REPOSITORY }}:${{ github.sha }}
