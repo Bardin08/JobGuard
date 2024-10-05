@@ -18,6 +18,8 @@ jobs:
     permissions: write-all
     steps:
       - uses: actions/checkout@v4
+        with: 
+          fetch-depth: 0
 
       - name: Restore NuGet packages cache
         id: nuget-cache
@@ -90,7 +92,8 @@ jobs:
           dotnet build \
           ${{ env.APPLICATION_SOURCES_ROOT }}/${{ env.APPLICATION_NAME }}/${{ env.APPLICATION_NAME }}.csproj \
           --configuration Release \
-          --no-restore
+          --no-restore \
+          /p:Version=${{ env.VERSION }}
 
   linting:
     runs-on: ubuntu-latest
