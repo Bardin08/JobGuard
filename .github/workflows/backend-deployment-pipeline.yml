@@ -10,6 +10,14 @@ on:
         options:
           - dev
 
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SDK_VERSION: 8.0.x
+  DOTNET_TFM: net8.0
+  APP_NAME: Cricut.PushNotifications
+  GHCR_REGISTRY: ghcr.io/bardin08/jobguard
+  GHCR_REPOSITORY: jobguard-api
+
 jobs:
   build-docker-image-and-deploy:
     runs-on: ubuntu-latest
@@ -27,8 +35,11 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t ghcr.io/bardin08/jobguard/jobguard-api:${{ github.sha }} backend/
-          docker push ghcr.io/bardin08/jobguard/jobguard-api:${{ github.sha }} 
+          -t ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }} `
+          --build-arg BIN_PATH=bin/Release/${{env.DOTNET_TFM}}/publish `
+          /backend
+
+          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
 
       - name: Deploy to Droplet
         uses: appleboy/ssh-action@master
@@ -41,4 +52,7 @@ jobs:
             docker pull ghcr.io/bardin08/jobguard/jobguard-api:${{ github.sha }}
             docker stop jobguard-api || true
             docker rm jobguard-api || true
-            docker run -d -p 51244:8080 --name jobguard-api ghcr.io/bardin08/jobguard/jobguard-api:${{ github.sha }}
+            docker run -d -p 51244:8080 --name jobguard-api \
+              -e ConnectionStrings__PostgresDb="${{ secrets.PG_CONNECTION_STRING }}" \
+              -e OpenAi__ApiKey="${{ secrets.OPEN_AI_API_KEY }}" \
+              ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
