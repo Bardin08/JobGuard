@@ -1,7 +1,7 @@
 name: Backend API Pipeline
 
 on:
-  push:
+  pull_request:
     paths:
       - 'backend/**'
   workflow_dispatch:
@@ -34,6 +34,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up .NET Core SDK
         uses: actions/setup-dotnet@v4
@@ -42,7 +44,7 @@ jobs:
 
       - name: Format only modified files
         run: |
-          MODIFIED_FILES=$(git diff --name-only origin/main...HEAD -- '*.cs')
+          MODIFIED_FILES=$(git diff --name-only origin/master...HEAD -- '*.cs')
           if [ -n "$MODIFIED_FILES" ]; then
             echo "$MODIFIED_FILES" | xargs dotnet format backend/JobGuard.sln --include --verify-no-changes
           else
