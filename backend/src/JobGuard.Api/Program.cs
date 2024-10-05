@@ -1,5 +1,6 @@
 using JobGuard.Api.Endpoints;
 using JobGuard.Api.Middlewares;
+using JobGuard.Api.Tooling;
 using JobGuard.Application;
 using JobGuard.Infrastructure;
 
@@ -13,8 +14,7 @@ builder.Services
     .AddApplication()
     .AddInfrastructure(builder.Configuration);
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwagger(builder.Configuration);
 
 builder.Services.AddCors(opt =>
 {
@@ -26,11 +26,7 @@ builder.Services.AddCors(opt =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger(builder.Configuration);
 
 app.MapGet("/healthz", () => Results.Ok())
     .WithTags("HealthCheck")
