@@ -30,15 +30,13 @@ public static class VerificationsEndpoints
             }
         );
 
-        verificationsEndpoints.MapPost("execute/{vId}", (
+        verificationsEndpoints.MapPost("execute/{vId}", async (
                 [FromRoute] string vId,
                 [FromServices] ISender mediator
             ) =>
             {
-                // TODO: Not working because of DI scopes. Should be implemented with background processing.
-                // Will implement in the next PR
                 var executeVerificationCommand = new ExecuteVerificationCommand(vId);
-                mediator.Send(executeVerificationCommand);
+                await mediator.Send(executeVerificationCommand);
                 return Results.Ok();
             }
         );
