@@ -26,9 +26,9 @@ jobs:
 
       - name: Build Backend API
         run: |
-          dotnet build `
-              ${{ env.APPLICATION_SOURCES_ROOT }}/${{ env.APPLICATION_NAME }}/${{ env.APPLICATION_NAME }}.csproj `
-              --configuration Release
+          dotnet build \
+          ${{ env.APPLICATION_SOURCES_ROOT }}/${{ env.APPLICATION_NAME }}/${{ env.APPLICATION_NAME }}.csproj \
+          --configuration Release
 
   linting:
     runs-on: ubuntu-latest
