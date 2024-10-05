@@ -18,6 +18,7 @@ jobs:
   build-docker-image-and-deploy:
     runs-on: ubuntu-latest
     permissions: write-all
+    environment: ${{ inputs.environment }}
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
