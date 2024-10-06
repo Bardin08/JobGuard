@@ -1,5 +1,7 @@
+using System.Text.Json;
 using JobGuard.Api.Endpoints;
 using JobGuard.Api.Middlewares;
+using JobGuard.Api.Models;
 using JobGuard.Api.Tooling;
 using JobGuard.Application;
 using JobGuard.Infrastructure;
@@ -28,7 +30,22 @@ var app = builder.Build();
 
 app.UseSwagger(builder.Configuration);
 
-app.MapGet("/healthz", () => Results.Ok())
+app.MapGet("/healthz", () =>
+    {
+        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Resources", "build-metadata.json");
+
+        if (File.Exists(filePath))
+        {
+            var metadata = File.ReadAllText(filePath);
+            return Results.Ok(new
+            {
+                Status = "Healthy",
+                BuildMetadata = JsonSerializer.Deserialize<BuildInfoResponseModel>(metadata)
+            });
+        }
+
+        return Results.NotFound("Build metadata not found.");
+    })
     .WithTags("HealthCheck")
     .WithOpenApi();
 
