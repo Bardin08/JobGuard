@@ -139,10 +139,6 @@ jobs:
             ${{ runner.os }}-nuget-
         if: steps.nuget-cache.outputs.cache-hit != 'true'
 
-      - name: View the API proj folder before publish an API
-        run: |
-          ls -l ${{ env.APPLICATION_SOURCES_ROOT }}/${{ env.APPLICATION_NAME }}/
-
       - name: Build Backend API
         run: |
           dotnet publish \
@@ -183,10 +179,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: View the binaries on the output folder
-        run: |
-          ls -l backend/output/
 
       - name: Build and Push Docker Image
         run: |
