@@ -59,7 +59,6 @@ jobs:
       version: ${{ steps.semver.outputs.VERSION }}
       branch_name: ${{ steps.get_branch.outputs.branch_name }}
       commit_hash: ${{ github.sha }}
-      build_metadata_json: ${{ steps.build_metadata.outputs.metadata_json }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -95,13 +94,12 @@ jobs:
 
           mkdir -p backend/src/JobGuard.Api/Resources
           echo '{
-            "version": "${{ env.VERSION }}",
-            "commitHash": "${{ github.sha }}",
-            "branch": "${{ env.BRANCH_NAME }}",
-            "buildTime": "$BUILD_TIME",
-            "buildNumber": "${{ github.run_number }}"
+            "Version": "${{ env.VERSION }}",
+            "CommitHash": "${{ github.sha }}",
+            "Branch": "${{ env.BRANCH_NAME }}",
+            "BuildTime": "$BUILD_TIME",
+            "BuildNumber": "${{ github.run_number }}"
           }' >> backend/src/JobGuard.Api/Resources/build-metadata.json
-          echo "metadata_json=backend/src/JobGuard.Api/Resources/build-metadata.json" >> $GITHUB_OUTPUT
 
   build:
     runs-on: ubuntu-latest
