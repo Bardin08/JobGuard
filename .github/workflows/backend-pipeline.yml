@@ -14,6 +14,7 @@ on:
   workflow_dispatch:
 
 env:
+  SOLUTION_NAME: JobGuard.sln
   APPLICATION_SOURCES_ROOT: backend/src
   APPLICATION_NAME: JobGuard.Api
   DOTNET_SDK_VERSION: 8.x
@@ -59,7 +60,6 @@ jobs:
       version: ${{ steps.semver.outputs.VERSION }}
       branch_name: ${{ steps.get_branch.outputs.branch_name }}
       commit_hash: ${{ github.sha }}
-      build_metadata_json: ${{ steps.build_metadata.outputs.metadata_json }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -74,7 +74,7 @@ jobs:
           BUILD_METADATA=${GITHUB_RUN_NUMBER}-${GITHUB_SHA::7}
           VERSION="$MAJOR.$MINOR.$PATCH-$BUILD_METADATA"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "::set-output name=VERSION::$VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Get actual branch name
         id: get_branch
@@ -84,8 +84,7 @@ jobs:
           else
             echo "BRANCH_NAME=${GITHUB_REF_NAME}" >> $GITHUB_ENV
           fi
-          echo "::set-output name=branch_name::$BRANCH_NAME"
-
+          echo " ranch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Create build metadata JSON
         id: build_metadata
@@ -94,15 +93,19 @@ jobs:
           
           echo "BUILD_TIME=$BUILD_TIME" >> $GITHUB_ENV
 
-          mkdir -p backend/src/JobGuard.Api/Resources
           echo '{
-            "version": "${{ env.VERSION }}",
-            "commitHash": "${{ github.sha }}",
-            "branch": "${{ env.BRANCH_NAME }}",
-            "buildTime": "$BUILD_TIME",
-            "buildNumber": "${{ github.run_number }}"
-          }' > backend/src/JobGuard.Api/Resources/build-metadata.json
-          echo "::set-output name=metadata_json::backend/src/JobGuard.Api/Resources/build-metadata.json"
+            "Version": "${{ env.VERSION }}",
+            "CommitHash": "${{ github.sha }}",
+            "Branch": "${{ env.BRANCH_NAME }}",
+            "BuildTime": "$BUILD_TIME",
+            "BuildNumber": "${{ github.run_number }}"
+          }' > build-metadata.json
+
+      - name: Save Build Metadata as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-metadata
+          path: build-metadata.json
 
   build:
     runs-on: ubuntu-latest
@@ -125,7 +128,7 @@ jobs:
           dotnet-version: ${{ env.DOTNET_SDK_VERSION }}
 
       - name: Restore NuGet packages
-        run: dotnet restore backend/JobGuard.sln
+        run: dotnet restore backend/${{ env.SOLUTION_NAME }}
 
       - name: Cache updated NuGet packages
         uses: actions/cache@v4
@@ -138,13 +141,19 @@ jobs:
 
       - name: Build Backend API
         run: |
-          dotnet build \
+          dotnet publish \
           ${{ env.APPLICATION_SOURCES_ROOT }}/${{ env.APPLICATION_NAME }}/${{ env.APPLICATION_NAME }}.csproj \
           --configuration Release \
           --no-restore \
-          /p:Version=${{ needs.versioning.outputs.version }} \
-          --output backend/output
-          
+          --output backend/output \
+          /p:Version=${{ needs.versioning.outputs.version }}
+
+      - name: Download Build Metadata Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-metadata
+          path: backend/output/
+
       - name: Save build artifacts
         uses: actions/upload-artifact@v4
         with:

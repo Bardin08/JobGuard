@@ -22,8 +22,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Update="Resources/build-metadata.json">
+        <None Update="build-metadata.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Resources\build-metadata.json" />
     </ItemGroup>
 </Project>
