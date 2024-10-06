@@ -32,7 +32,7 @@ app.UseSwagger(builder.Configuration);
 
 app.MapGet("/healthz", () =>
     {
-        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Resources", "build-metadata.json");
+        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "build-metadata.json");
 
         if (File.Exists(filePath))
         {
