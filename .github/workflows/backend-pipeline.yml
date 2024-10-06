@@ -138,6 +138,10 @@ jobs:
             ${{ runner.os }}-nuget-
         if: steps.nuget-cache.outputs.cache-hit != 'true'
 
+      - name: View the API proj folder before publish an API
+        run: |
+          ls -l backend/output/
+
       - name: Build Backend API
         run: |
           dotnet publish \
