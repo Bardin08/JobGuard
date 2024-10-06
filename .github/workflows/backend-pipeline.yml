@@ -173,6 +173,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: View the binaries on the output folder
+        run: |
+          ls -l backend/output/
+
       - name: Build and Push Docker Image
         run: |
           docker build -t ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_REPOSITORY }}:${{ needs.versioning.outputs.version }} backend/
