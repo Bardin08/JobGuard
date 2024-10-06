@@ -99,7 +99,12 @@ jobs:
             "Branch": "${{ env.BRANCH_NAME }}",
             "BuildTime": "$BUILD_TIME",
             "BuildNumber": "${{ github.run_number }}"
-          }' >> backend/src/JobGuard.Api/Resources/build-metadata.json
+          }' > backend/src/JobGuard.Api/Resources/build-metadata.json
+
+      - name: Verify build metadata file exists
+        run: |
+          ls -l backend/src/JobGuard.Api/Resources/
+          cat backend/src/JobGuard.Api/Resources/build-metadata.json
 
   build:
     runs-on: ubuntu-latest
