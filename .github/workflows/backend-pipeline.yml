@@ -1,22 +1,173 @@
 name: Backend API Pipeline
 
 on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'backend/**'
   push:
+    branches:
+      - master
     paths:
       - 'backend/**'
   workflow_dispatch:
 
+env:
+  APPLICATION_SOURCES_ROOT: backend/src
+  APPLICATION_NAME: JobGuard.Api
+  DOTNET_SDK_VERSION: 8.x
+  DOTNET_NOLOGO: true
+  GHCR_REGISTRY: ghcr.io/bardin08/jobguard
+  GHCR_REPOSITORY: jobguard-api
+
 jobs:
-  build-and-deploy:
+  linting:
     runs-on: ubuntu-latest
-    permissions: write-all
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET Core SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_SDK_VERSION }}
+
+      - name: Format only modified files
+        run: |
+          MODIFIED_FILES=$(git diff --name-only origin/master...HEAD -- '*.cs')
+          if [ -n "$MODIFIED_FILES" ]; then
+            echo "$MODIFIED_FILES" | xargs dotnet format backend/JobGuard.sln --include --verify-no-changes
+          else
+            echo "No C# files modified. Skipping format check."
+          fi
+
+      - name: Comment on PR if Linting Fails
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.payload.pull_request.number,
+              body: "🚨 **Linting Check Failed**: Please fix the formatting issues before merging.\n\nYou can run `dotnet format` locally to automatically correct these issues."
+            })
+
+  versioning:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.semver.outputs.VERSION }}
+      branch_name: ${{ steps.get_branch.outputs.branch_name }}
+      commit_hash: ${{ github.sha }}
+      build_metadata_json: ${{ steps.build_metadata.outputs.metadata_json }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate SemVer version
+        id: semver
+        run: |
+          MAJOR=0
+          MINOR=$(git rev-list --count origin/master)
+          PATCH=$(git rev-list --count HEAD ^origin/master)
+          BUILD_METADATA=${GITHUB_RUN_NUMBER}-${GITHUB_SHA::7}
+          VERSION="$MAJOR.$MINOR.$PATCH-$BUILD_METADATA"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "::set-output name=VERSION::$VERSION"
+
+      - name: Get actual branch name
+        id: get_branch
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "BRANCH_NAME=${GITHUB_HEAD_REF}" >> $GITHUB_ENV
+          else
+            echo "BRANCH_NAME=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+          fi
+          echo "::set-output name=branch_name::$BRANCH_NAME"
+
+
+      - name: Create build metadata JSON
+        id: build_metadata
+        run: |
+          mkdir -p backend/src/JobGuard.Api/Resources
+          echo '{
+            "Version": "${{ env.VERSION }}",
+            "CommitHash": "${{ github.sha }}",
+            "Branch": "${{ env.BRANCH_NAME }}",
+            "BuildTime": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+            "BuildNumber": "${{ github.run_number }}"
+          }' > backend/src/JobGuard.Api/Resources/build-metadata.json
+          echo "::set-output name=metadata_json::backend/src/JobGuard.Api/Resources/build-metadata.json"
+
+  build:
+    runs-on: ubuntu-latest
+    needs: versioning
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore NuGet packages cache
+        id: nuget-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}-${{ hashFiles('**/*.sln') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0'
+          dotnet-version: ${{ env.DOTNET_SDK_VERSION }}
+
+      - name: Restore NuGet packages
+        run: dotnet restore backend/JobGuard.sln
+
+      - name: Cache updated NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}-${{ hashFiles('**/*.sln') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+        if: steps.nuget-cache.outputs.cache-hit != 'true'
 
       - name: Build Backend API
-        run: dotnet build backend/src/JobGuard.Api/JobGuard.Api.csproj --configuration Release
+        run: |
+          dotnet build \
+          ${{ env.APPLICATION_SOURCES_ROOT }}/${{ env.APPLICATION_NAME }}/${{ env.APPLICATION_NAME }}.csproj \
+          --configuration Release \
+          --no-restore \
+          /p:Version=${{ needs.versioning.outputs.version }} \
+          --output backend/output
+          
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: backend/output
+
+  docker:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    needs: [build, versioning]
+    steps:
+      - uses: actions/checkout@v4
+        
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: backend/output/
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_REPOSITORY }}:${{ needs.versioning.outputs.version }} backend/
+          docker push ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_REPOSITORY }}:${{ needs.versioning.outputs.version }}
