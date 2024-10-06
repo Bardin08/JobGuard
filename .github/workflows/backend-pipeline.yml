@@ -135,7 +135,7 @@ jobs:
 
       - name: Build Backend API
         run: |
-          dotnet build \
+          dotnet publish \
           ${{ env.APPLICATION_SOURCES_ROOT }}/${{ env.APPLICATION_NAME }}/${{ env.APPLICATION_NAME }}.csproj \
           --configuration Release \
           --no-restore \
