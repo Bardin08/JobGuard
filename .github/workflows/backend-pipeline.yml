@@ -14,6 +14,7 @@ on:
   workflow_dispatch:
 
 env:
+  SOLUTION_NAME: JobGuard.sln
   APPLICATION_SOURCES_ROOT: backend/src
   APPLICATION_NAME: JobGuard.Api
   DOTNET_SDK_VERSION: 8.x
@@ -92,19 +93,19 @@ jobs:
           
           echo "BUILD_TIME=$BUILD_TIME" >> $GITHUB_ENV
 
-          mkdir -p backend/src/JobGuard.Api/Resources
           echo '{
             "Version": "${{ env.VERSION }}",
             "CommitHash": "${{ github.sha }}",
             "Branch": "${{ env.BRANCH_NAME }}",
             "BuildTime": "$BUILD_TIME",
             "BuildNumber": "${{ github.run_number }}"
-          }' > backend/src/JobGuard.Api/build-metadata.json
+          }' > build-metadata.json
 
-      - name: Verify build metadata file exists
-        run: |
-          ls -l backend/src/JobGuard.Api/
-          cat backend/src/JobGuard.Api/build-metadata.json
+      - name: Save Build Metadata as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-metadata
+          path: build-metadata.json
 
   build:
     runs-on: ubuntu-latest
@@ -127,7 +128,7 @@ jobs:
           dotnet-version: ${{ env.DOTNET_SDK_VERSION }}
 
       - name: Restore NuGet packages
-        run: dotnet restore backend/JobGuard.sln
+        run: dotnet restore backend/${{ env.SOLUTION_NAME }}
 
       - name: Cache updated NuGet packages
         uses: actions/cache@v4
@@ -148,13 +149,14 @@ jobs:
           ${{ env.APPLICATION_SOURCES_ROOT }}/${{ env.APPLICATION_NAME }}/${{ env.APPLICATION_NAME }}.csproj \
           --configuration Release \
           --no-restore \
-          /p:Version=${{ needs.versioning.outputs.version }} \
-          --output backend/output
+          --output backend/output \
+          /p:Version=${{ needs.versioning.outputs.version }}
 
-      - name: Copy build-metadata.json to output folder
-        run: |
-          cp backend/src/JobGuard.Api/build-metadata.json backend/output/
-          ls -l backend/output/
+      - name: Download Build Metadata Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-metadata
+          path: backend/output/
 
       - name: Save build artifacts
         uses: actions/upload-artifact@v4
