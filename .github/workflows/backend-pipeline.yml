@@ -74,7 +74,7 @@ jobs:
           BUILD_METADATA=${GITHUB_RUN_NUMBER}-${GITHUB_SHA::7}
           VERSION="$MAJOR.$MINOR.$PATCH-$BUILD_METADATA"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "::set-output name=VERSION::$VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Get actual branch name
         id: get_branch
@@ -84,8 +84,7 @@ jobs:
           else
             echo "BRANCH_NAME=${GITHUB_REF_NAME}" >> $GITHUB_ENV
           fi
-          echo "::set-output name=branch_name::$BRANCH_NAME"
-
+          echo " ranch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Create build metadata JSON
         id: build_metadata
@@ -101,8 +100,8 @@ jobs:
             "branch": "${{ env.BRANCH_NAME }}",
             "buildTime": "$BUILD_TIME",
             "buildNumber": "${{ github.run_number }}"
-          }' > backend/src/JobGuard.Api/Resources/build-metadata.json
-          echo "::set-output name=metadata_json::backend/src/JobGuard.Api/Resources/build-metadata.json"
+          }' >> backend/src/JobGuard.Api/Resources/build-metadata.json
+          echo "metadata_json=backend/src/JobGuard.Api/Resources/build-metadata.json" >> $GITHUB_OUTPUT
 
   build:
     runs-on: ubuntu-latest
