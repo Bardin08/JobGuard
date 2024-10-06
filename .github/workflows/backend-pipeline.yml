@@ -91,6 +91,7 @@ jobs:
         id: build_metadata
         run: |
           echo "BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_ENV
+          echo "Captured Build Time: $BUILD_TIME"
 
           mkdir -p backend/src/JobGuard.Api/Resources
           echo '{
